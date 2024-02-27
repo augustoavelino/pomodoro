@@ -24,6 +24,8 @@ class PomodoroTimer {
     var focusDuration: TimeInterval
     var shortBreakDuration: TimeInterval
     var longBreakDuration: TimeInterval
+    var focusLimit: Int = 4
+    private(set) var focusCount: Int = 0
     private(set) var elapsedTime: TimeInterval
     private(set) var currentState: State
     var currentMode: Mode
@@ -91,9 +93,15 @@ class PomodoroTimer {
         let newMode: Mode
         switch currentMode {
         case .focus:
-            newMode = .shortBreak
+            focusCount += 1
+            if focusCount < focusLimit {
+                newMode = .shortBreak
+            } else {
+                focusCount = 0
+                newMode = .longBreak
+            }
         case .shortBreak:
-            newMode = .longBreak
+            newMode = .focus
         case .longBreak:
             newMode = .focus
         }

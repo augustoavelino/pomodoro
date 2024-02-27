@@ -101,9 +101,9 @@ class TimerViewController: UIViewController {
     private func setupPickerViewData() {
         pickerView.delegate = self
         pickerView.dataSource = self
-        pickerView.selectRow(14, inComponent: 0, animated: false)
-        pickerView.selectRow(4, inComponent: 1, animated: false)
-        pickerView.selectRow(24, inComponent: 2, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.longBreakDuration) / 60) - 1, inComponent: 0, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.shortBreakDuration) / 60) - 1, inComponent: 1, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.focusDuration) / 60) - 1, inComponent: 2, animated: false)
     }
     
     private func setupPickerViewLayout() {
