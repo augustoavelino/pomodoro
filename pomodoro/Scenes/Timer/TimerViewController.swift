@@ -12,7 +12,7 @@ class TimerViewController: UIViewController {
     
     // MARK: Properties
     
-    let pomodoroTimer = PomodoroTimer.default
+    let pomodoroTimer: PomodoroTimer
     let synthesizer = AVSpeechSynthesizer()
     
     // MARK: UI
@@ -48,17 +48,27 @@ class TimerViewController: UIViewController {
         configuration.cornerStyle = .capsule
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 16.0, leading: 16.0, bottom: 16.0, trailing: 16.0)
         configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 24)
+        configuration.image = UIImage(systemName: "stop.fill")
         let button = UIButton(configuration: configuration)
-        button.setImage(UIImage(systemName: "stop.fill"), for: .normal)
         button.tintColor = .systemGreen
         return button
     }()
     
     // MARK: - Life cycle
     
+    init(pomodoroTimer: PomodoroTimer) {
+        self.pomodoroTimer = pomodoroTimer
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        loadData()
         pomodoroTimer.delegate = self
     }
     
@@ -70,24 +80,34 @@ class TimerViewController: UIViewController {
     // MARK: - Setup
     
     private func setupUI() {
-        view.backgroundColor = .systemBlue
         title = pomodoroTimer.currentMode.rawValue
+        view.backgroundColor = DSColors.focus
         setupTimerDisplay()
-        setupPickerBackground()
-        setupPickerViewData()
-        setupPickerViewLayout()
+        setupPickerView()
         setupStartButton()
         setupStopButton()
     }
     
+    private func loadData() {
+        pomodoroTimer.configuration = .default
+        pickerView.reloadAllComponents()
+        updateTimerDisplay()
+    }
+    
     private func setupTimerDisplay() {
-        timerDisplay.setTime(pomodoroTimer.focusDuration)
+        timerDisplay.setTime(pomodoroTimer.duration(for: .focus))
         view.addSubview(timerDisplay)
         timerDisplay.translatesAutoresizingMaskIntoConstraints = false
         timerDisplay.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         timerDisplay.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -16.0).isActive = true
         timerDisplay.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         timerDisplay.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+    }
+    
+    private func setupPickerView() {
+        setupPickerBackground()
+        setupPickerViewData()
+        setupPickerViewLayout()
     }
     
     private func setupPickerBackground() {
@@ -101,9 +121,9 @@ class TimerViewController: UIViewController {
     private func setupPickerViewData() {
         pickerView.delegate = self
         pickerView.dataSource = self
-        pickerView.selectRow((Int(pomodoroTimer.longBreakDuration) / 60) - 1, inComponent: 0, animated: false)
-        pickerView.selectRow((Int(pomodoroTimer.shortBreakDuration) / 60) - 1, inComponent: 1, animated: false)
-        pickerView.selectRow((Int(pomodoroTimer.focusDuration) / 60) - 1, inComponent: 2, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.duration(for: .longBreak)) / 60) - 1, inComponent: 0, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.duration(for: .shortBreak)) / 60) - 1, inComponent: 1, animated: false)
+        pickerView.selectRow((Int(pomodoroTimer.duration(for: .focus)) / 60) - 1, inComponent: 2, animated: false)
     }
     
     private func setupPickerViewLayout() {
@@ -170,47 +190,24 @@ extension TimerViewController: PomodoroTimerDelegate {
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: "PomodoroTimerNotification", content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-        utter(content.body)
-    }
-    
-    private func utter(_ string: String) {
-        // Create an utterance.
-        let utterance = AVSpeechUtterance(string: string)
-
-        // Configure the utterance.
-        utterance.rate = 0.57
-        utterance.pitchMultiplier = 0.8
-        utterance.postUtteranceDelay = 0.2
-        utterance.volume = 0.8
-
-        // Retrieve the British English voice.
-        let voice = AVSpeechSynthesisVoice(language: "en-GB")
-
-        // Assign the voice to the utterance.
-        utterance.voice = voice
-        
-        synthesizer.speak(utterance)
+        synthesizer.utter(content.body)
     }
     
     func pomodoroTimer(_ timer: PomodoroTimer, didChangeModeTo currentMode: PomodoroTimer.Mode) {
-        let newBackgroundColor: UIColor
-        let newTintColor: UIColor
-        switch currentMode {
-        case .focus:
-            newBackgroundColor = .systemBlue
-            newTintColor = .systemGreen
-        case .shortBreak:
-            newBackgroundColor = .systemGreen
-            newTintColor = .systemMint
-        case .longBreak:
-            newBackgroundColor = .systemMint
-            newTintColor = .systemBlue
-        }
+        let colors = modeColors(currentMode: currentMode)
         title = currentMode.rawValue
         UIView.animate(withDuration: 0.2, delay: 0.0, options: .curveEaseInOut) {
-            self.view.backgroundColor = newBackgroundColor
-            self.startButton.tintColor = newTintColor
-            self.stopButton.tintColor = newTintColor
+            self.view.backgroundColor = colors.background
+            self.startButton.tintColor = colors.tint
+            self.stopButton.tintColor = colors.tint
+        }
+    }
+    
+    private func modeColors(currentMode: PomodoroTimer.Mode) -> (background: UIColor, tint: UIColor) {
+        switch currentMode {
+        case .focus: return (DSColors.focus, DSColors.focusTint)
+        case .shortBreak: return (DSColors.shortBreak, DSColors.shortBreakTint)
+        case .longBreak: return (DSColors.longBreak, DSColors.longBreakTint)
         }
     }
     
@@ -224,27 +221,18 @@ extension TimerViewController: PomodoroTimerDelegate {
 extension TimerViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         let selectedValue = row + 1
-        if component == 2 {
-            pomodoroTimer.focusDuration = TimeInterval(selectedValue) * 60
-        } else if component == 1 {
-            pomodoroTimer.shortBreakDuration = TimeInterval(selectedValue) * 60
-        } else {
-            pomodoroTimer.longBreakDuration = TimeInterval(selectedValue) * 60
+        let duration = TimeInterval(selectedValue) * 60
+        let mode: PomodoroTimer.Mode = switch component {
+        case 2: .focus
+        case 1: .shortBreak
+        default: .longBreak
         }
+        pomodoroTimer.setDuration(duration, for: mode)
         updateTimerDisplay()
     }
     
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-        let label: UILabel
-        if let reusing = view as? UILabel {
-            label = reusing
-        } else {
-            label = UILabel()
-            label.textColor = UIColor.white
-            label.font = .systemFont(ofSize: 24, weight: .semibold, width: .expanded)
-            label.textAlignment = .center
-            label.transform = label.transform.rotated(by: .pi / 2)
-        }
+        let label: UILabel = (view as? PickerLabel) ?? PickerLabel()
         label.text = "\(row + 1)"
         return label
     }

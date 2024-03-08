@@ -24,29 +24,9 @@ class TimerDisplay: UIView {
         return stackView
     }()
     
-    private let minutesLabel: UILabel = {
-        let label = UILabel()
-        label.text = "00"
-        label.font = .monospacedDigitSystemFont(ofSize: 80.0, weight: .semibold)
-        label.textColor = UIColor.white
-        return label
-    }()
-    
-    private let blinkingLabel: UILabel = {
-        let label = UILabel()
-        label.text = ":"
-        label.font = .monospacedDigitSystemFont(ofSize: 80.0, weight: .semibold)
-        label.textColor = UIColor.white
-        return label
-    }()
-    
-    private let secondsLabel: UILabel = {
-        let label = UILabel()
-        label.text = "00"
-        label.font = .monospacedDigitSystemFont(ofSize: 80.0, weight: .semibold)
-        label.textColor = UIColor.white
-        return label
-    }()
+    private let minutesLabel: UILabel = DisplayLabel(text: "00")
+    private let blinkingLabel: UILabel = DisplayLabel(text: ":")
+    private let secondsLabel: UILabel = DisplayLabel(text: "00")
     
     // MARK: - Life cycle
     
@@ -109,5 +89,20 @@ class TimerDisplay: UIView {
         isBlinking = false
         blinkingTimer?.invalidate()
         blinkingTimer = nil
+    }
+}
+
+// MARK: - DisplayLabel
+
+private class DisplayLabel: UILabel {
+    init(text: String?) {
+        super.init(frame: .zero)
+        self.text = text
+        font = DSFonts.timerDisplay
+        textColor = DSColors.primaryText
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
