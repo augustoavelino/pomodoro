@@ -17,7 +17,11 @@ class TimerViewController: UIViewController {
     
     // MARK: UI
     
-    private let timerDisplay = TimerDisplay()
+    private let timerDisplay: TimerDisplay = {
+        let timerDisplay = TimerDisplay()
+        timerDisplay.accessibilityIdentifier = "timerViewController.timerDisplay"
+        return timerDisplay
+    }()
     
     private let startButton: UIButton = {
         var configuration = UIButton.Configuration.tinted()
@@ -25,6 +29,7 @@ class TimerViewController: UIViewController {
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 20.0, leading: 20.0, bottom: 20.0, trailing: 20.0)
         configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 28)
         let button = UIButton(configuration: configuration)
+        button.accessibilityIdentifier = "timerViewController.startButton"
         button.setImage(UIImage(systemName: "play.fill"), for: .normal)
         button.setImage(UIImage(systemName: "pause.fill"), for: .selected)
         button.tintColor = .systemGreen
@@ -38,6 +43,7 @@ class TimerViewController: UIViewController {
         configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 24)
         configuration.image = UIImage(systemName: "stop.fill")
         let button = UIButton(configuration: configuration)
+        button.accessibilityIdentifier = "timerViewController.stopButton"
         button.tintColor = .systemGreen
         return button
     }()

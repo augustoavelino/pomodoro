@@ -19,8 +19,8 @@ class TimerDisplay: UIView {
     
     private let progressView: CircularProgressView = {
         let progressView = CircularProgressView(progressColor: .systemTeal, trackColor: .systemGray)
-//        progressView.setProgress(0.5)
         progressView.translatesAutoresizingMaskIntoConstraints = false
+        progressView.accessibilityIdentifier = "timerDisplay.progressView"
         return progressView
     }()
     
@@ -31,9 +31,21 @@ class TimerDisplay: UIView {
         return stackView
     }()
     
-    private let minutesLabel: UILabel = DisplayLabel(text: "00")
-    private let blinkingLabel: UILabel = DisplayLabel(text: ":")
-    private let secondsLabel: UILabel = DisplayLabel(text: "00")
+    private let minutesLabel: UILabel = {
+        let label = DisplayLabel(text: "00")
+        label.accessibilityIdentifier = "timerDisplay.minutesLabel"
+        return label
+    }()
+    private let blinkingLabel: UILabel = {
+        let label = DisplayLabel(text: ":")
+        label.accessibilityIdentifier = "timerDisplay.blinkingLabel"
+        return label
+    }()
+    private let secondsLabel: UILabel = {
+        let label = DisplayLabel(text: "00")
+        label.accessibilityIdentifier = "timerDisplay.secondsLabel"
+        return label
+    }()
     
     // MARK: - Life cycle
     

@@ -1,17 +1,16 @@
 //
-//  pomodoroUITests.swift
+//  TimerViewControllerUITests.swift
 //  pomodoroUITests
 //
-//  Created by Augusto Avelino on 19/02/24.
+//  Created by Augusto Avelino on 25/04/24.
 //
 
 import XCTest
 
-final class pomodoroUITests: XCTestCase {
+final class TimerViewControllerUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
+        
         // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
 
@@ -19,14 +18,20 @@ final class pomodoroUITests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
-
+        
+        XCTAssertTrue(app.otherElements["timerViewController.timerDisplay"].exists)
+        
+        let minutesLabel = app.staticTexts.element(matching: .any, identifier: "timerDisplay.minutesLabel")
+        XCTAssertTrue(minutesLabel.exists)
+        let blinkingLabel = app.staticTexts.element(matching: .any, identifier: "timerDisplay.blinkingLabel")
+        XCTAssertTrue(blinkingLabel.exists)
+        let secondsLabel = app.staticTexts.element(matching: .any, identifier: "timerDisplay.secondsLabel")
+        XCTAssertTrue(secondsLabel.exists)
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
