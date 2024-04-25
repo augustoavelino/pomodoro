@@ -17,6 +17,13 @@ class TimerDisplay: UIView {
     
     // MARK: UI
     
+    private let progressView: CircularProgressView = {
+        let progressView = CircularProgressView(progressColor: .systemTeal, trackColor: .systemGray)
+//        progressView.setProgress(0.5)
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        return progressView
+    }()
+    
     private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +49,16 @@ class TimerDisplay: UIView {
     // MARK: - Setup
     
     private func setupUI() {
+        setupProgressView()
         setupStackView()
+    }
+    
+    private func setupProgressView() {
+        addSubview(progressView)
+        progressView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        progressView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        progressView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        progressView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
     }
     
     private func setupStackView() {
@@ -65,6 +81,11 @@ class TimerDisplay: UIView {
     }
     
     // MARK: - Display actions
+    
+    func startAnimations(progressDuration: TimeInterval) {
+        startBlinking()
+        
+    }
     
     func startBlinking() {
         isBlinking = true
@@ -89,6 +110,27 @@ class TimerDisplay: UIView {
         isBlinking = false
         blinkingTimer?.invalidate()
         blinkingTimer = nil
+    }
+    
+    /**
+     Sets the progress of the circular progress indicator with optional animation.
+
+     - Parameters:
+        - progress: The progress value to be set, ranging from 0.0 to 1.0.
+        - duration: Optional. The duration of the animation for updating the progress. If `duration` is greater than 0.0, the progress update is animated; otherwise, it's set immediately. Default is 0.0, indicating an immediate update.
+
+     This method updates the progress of the circular progress indicator to the specified value. If `duration` is greater than 0.0, the update is animated using the default animation settings. If `duration` is 0.0 or less, the progress is set immediately without animation.
+     */
+    func setProgress(_ progress: Float, duration: TimeInterval = 0.0) {
+        if duration > 0.0 {
+            progressView.setProgressAnimated(progress, duration: duration)
+        } else {
+            progressView.setProgress(CGFloat(progress))
+        }
+    }
+    
+    func stopProgress() {
+        progressView.stopAnimation()
     }
 }
 

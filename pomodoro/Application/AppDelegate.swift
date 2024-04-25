@@ -18,6 +18,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
+    private func setupWindow() {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = makeInitialViewController()
+        window?.makeKeyAndVisible()
+    }
+    
     private func setupNotificationCenter() {
         notificationCenter.delegate = self
         notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { _, error in
@@ -27,16 +33,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
-    private func setupWindow() {
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = makeInitialViewController()
-        window?.makeKeyAndVisible()
-    }
-    
     private func makeInitialViewController() -> UIViewController {
-        let navigationController = UINavigationController(
-            rootViewController: TimerViewController(
-                pomodoroTimer: PomodoroTimer(settings: .default)))
+        let viewModel = TimerViewModel(pomodoroTimer: PomodoroTimer(settings: .default))
+        let viewController = TimerViewController(
+            viewModel: viewModel)
+        viewModel.timerDelegate = viewController
+        let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.navigationBar.prefersLargeTitles = true
         navigationController.navigationBar.tintColor = .white
         return navigationController

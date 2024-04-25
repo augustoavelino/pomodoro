@@ -30,13 +30,13 @@ protocol PomodoroTimerDelegate: AnyObject {
     /// - Parameters:
     ///   - timer: The `PomodoroTimer` instance.
     ///   - currentMode: The new mode of the timer.
-    func pomodoroTimer(_ timer: PomodoroTimer, didChangeModeTo currentMode: PomodoroTimer.Mode)
+    func pomodoroTimer(_ timer: PomodoroTimer, didChangeModeFrom previousMode: PomodoroTimer.Mode, to currentMode: PomodoroTimer.Mode)
 }
 
 extension PomodoroTimerDelegate {
     func pomodoroTimer(_ timer: PomodoroTimer, didUpdateElapsedTime elapsedTime: TimeInterval) {}
     func pomodoroTimer(_ timer: PomodoroTimer, willChangeModeFrom currentMode: PomodoroTimer.Mode, to newMode: PomodoroTimer.Mode) {}
-    func pomodoroTimer(_ timer: PomodoroTimer, didChangeModeTo currentMode: PomodoroTimer.Mode) {}
+    func pomodoroTimer(_ timer: PomodoroTimer, didChangeModeFrom previousMode: PomodoroTimer.Mode, to currentMode: PomodoroTimer.Mode) {}
 }
 
 /// An object that manages the timing functionality for a Pomodoro timer.
@@ -170,8 +170,9 @@ class PomodoroTimer {
             newMode = .focus
         }
         delegate?.pomodoroTimer(self, willChangeModeFrom: currentMode, to: newMode)
+        let previousMode = currentMode
         currentMode = newMode
-        delegate?.pomodoroTimer(self, didChangeModeTo: newMode)
+        delegate?.pomodoroTimer(self, didChangeModeFrom: previousMode, to: newMode)
     }
 }
 
