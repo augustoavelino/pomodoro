@@ -32,16 +32,12 @@ class CircularProgressView: UIView {
         }
     }
     
-    /**
-     A path that consists of straight and curved line segments that you can render in your custom views.
-     Meaning our CAShapeLayer will now be drawn on the screen with the path we have specified here
-     */
-    private var viewCGPath: CGPath? {
+    private var circleCGPath: CGPath? {
         return UIBezierPath(
             arcCenter: CGPoint(x: bounds.size.width / 2.0, y: bounds.size.height / 2.0),
-            radius: (bounds.size.width - 10)/2,
-            startAngle: CGFloat(-0.5 * Double.pi),
-            endAngle: CGFloat(1.5 * Double.pi),
+            radius: (bounds.size.width - lineWidth) / 2,
+            startAngle: CGFloat(-0.5 * .pi),
+            endAngle: CGFloat(1.5 * .pi),
             clockwise: true
         ).cgPath
     }
@@ -73,7 +69,7 @@ class CircularProgressView: UIView {
     }
     
     private func drawLayer(using shape: CAShapeLayer, color: UIColor, ending: CGFloat, lineCap: CAShapeLayerLineCap = .butt) {
-        shape.path = self.viewCGPath
+        shape.path = self.circleCGPath
         shape.fillColor = UIColor.clear.cgColor
         shape.strokeColor = color.cgColor
         shape.lineWidth = lineWidth

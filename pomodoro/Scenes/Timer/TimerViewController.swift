@@ -58,11 +58,6 @@ class TimerViewController: UIViewController {
         setupUI()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        timerDisplay.setProgress(1.0)
-    }
-    
     deinit {
         timerDisplay.stopBlinking()
         viewModel.stopTimer()
